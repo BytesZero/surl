@@ -8,4 +8,5 @@ edition = "2021"
 [dependencies]
 actix-web = "4.4.0"
 md5 = "0.7.0"
-redis = "0.23.3"
+redis = { version = "0.23.3", features = ["tokio-comp", "r2d2"] }
+r2d2 = "0.8.10"
