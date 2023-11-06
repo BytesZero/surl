@@ -1,4 +1,4 @@
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{get, post, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
 use md5;
 use r2d2::Pool;
 use redis::{Client, Commands};
@@ -11,15 +11,17 @@ async fn status() -> impl Responder {
 
 // 缩短链接
 #[post("/s")]
-async fn s(url: String, client: web::Data<Pool<Client>>) -> impl Responder {
+async fn s(url: String, req: HttpRequest, client: web::Data<Pool<Client>>) -> impl Responder {
     // 判断空
     if url.is_empty() {
         return HttpResponse::BadRequest().body("param is empty");
     }
+    // 获取 host
+    let host = req.headers().get("host").unwrap().to_str().unwrap();
     // 生成短链
     let smd5 = format!("{:x}", md5::compute(&url));
     let short = smd5[0..8].to_string();
-    let surl = format!("http://127.0.0.1:8080/{}", short);
+    let surl = format!("http://{}/{}", host, short);
     // 写入 redis
     set_data(&client, &short, &url).unwrap();
     HttpResponse::Ok().body(surl)
@@ -59,7 +61,7 @@ async fn main() -> std::io::Result<()> {
             .service(r)
     })
     .bind(("0.0.0.0", 8080))?
-    .workers(4)
+    .workers(5)
     .run()
     .await
 }
