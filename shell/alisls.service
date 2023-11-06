@@ -1,0 +1,12 @@
+[Unit]
+Description=Rust Surl Service
+
+[Service]
+ExecStart=/root/project/surl/target/release/surl
+WorkingDirectory=/root/project/surl
+Restart=always
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target
