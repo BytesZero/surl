@@ -1,5 +1,7 @@
+use std::env;
+
 use actix_web::{get, post, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
-use md5;
+use dotenvy::dotenv;
 use r2d2::Pool;
 use redis::{Client, Commands};
 
@@ -49,8 +51,12 @@ async fn r(short: web::Path<String>, client: web::Data<Pool<Client>>) -> impl Re
 // 主程序入口
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    // redis 客户端
-    let client = redis::Client::open("redis://127.0.0.1:6379/").unwrap();
+    // 获取配置
+    dotenv().ok();
+    // 获取 redis 配置
+    let redis_url = env::var("REDIS_URL").expect("REDIS_URL 必须设置");
+    // redis 链接池
+    let client = redis::Client::open(redis_url).unwrap();
     let pool = r2d2::Pool::builder().max_size(100).build(client).unwrap();
     // 启动服务
     HttpServer::new(move || {
@@ -60,8 +66,8 @@ async fn main() -> std::io::Result<()> {
             .service(s)
             .service(r)
     })
-    .bind(("0.0.0.0", 8080))?
-    .workers(5)
+    .bind(("0.0.0.0", 8082))?
+    .workers(2)
     .run()
     .await
 }
