@@ -1,4 +1,6 @@
 #!/bin/bash
+# 从 Cargo.toml 获取项目名称
+PROJECT_NAME=$(grep '^name =' Cargo.toml | awk -F '"' '{print $2}')
 # 拉最新的代码
 git pull
 # 构建版本
