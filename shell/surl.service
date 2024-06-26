@@ -2,8 +2,9 @@
 Description=Rust Surl Service
 
 [Service]
-ExecStart=/root/project/surl/target/release/surl
-WorkingDirectory=/root/project/surl
+ExecStart=/root/pro/surl/dist/surl
+WorkingDirectory=/root/pro/surl
+Environment=RUST_LOG=info
 Restart=always
 User=root
 Group=root
